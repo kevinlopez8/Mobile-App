@@ -1,81 +1,62 @@
-import { Button, Text, TextInput , View, StyleSheet } from 'react-native';
-import { useState } from 'react';
-
+import { useState } from "react";
+import { StyleSheet, View, Text } from "react-native";
+import Header from "./components/Header";
+import GameScreen from "./screens/GameScreen";
+import StartGameScreen from "./screens/StartGameScreen";
+import { useFonts } from "expo-font";
+import ResultScreen from "./screens/ResultScreen";
 
 export default function App() {
-  
-  const [textItem, setTextItem] = useState('')
-  const [itemList, setItemList] = useState([])
-  
-  const onHandleChangeItem = (t) =>{
-    setTextItem(t)
-  }
+  const [loaded] = useFonts({
+    RubikBubbles: require("./assets/fonts/RubikBubbles-Regular.ttf"),
+  });
 
-  const addItem = ()=>{
-    setItemList((currentList)=>[
-      ...currentList,
-      {id: Math.random().toString(), value: textItem},
-    ]);
-    setTextItem('');
+  const [userNumber, setUserNumber] = useState();
+  const [winOrLose, setWinOrLose] = useState(false);
+  const [result, setResult] = useState("");
+
+  const handleStartGame = (selectedNumber) => {
+    setUserNumber(selectedNumber);
   };
 
-  const renderItem = ({ item }) =>(
-    <View style={styles.items} >
-      <Text>{item.value}</Text>
-      <Button title='presiona' />
-    </View>
-  );
+  const handleFinishGame = (selection, number) => {
+    if (
+      (selection === "lower" && userNumber < number) ||
+      (selection === "greater" && userNumber > number)
+    ) {
+      setResult("win");
+    } else {
+      setResult("lose");
+    }
+    setWinOrLose(true);
+  };
 
+  let content = <StartGameScreen onStartGame={handleStartGame} />;
 
+  if (userNumber && winOrLose === true) {
+    content = <ResultScreen result={result}/>
+  } else if (userNumber){
+    content = <GameScreen handleResult={handleFinishGame}/>;
+  }
+
+  if (!loaded) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.inputContainer}>
-        <TextInput style={styles.input} />
-        <Button title='Agregar' />
-      </View>
-      <View>
-        <Text style={styles.text}>Item #1</Text>
-        <Text style={styles.text}>Item #2</Text>
-        <Text style={styles.text}>Item #3</Text>
-      </View>
+      <Header
+        title={"Adivina el numero"}
+        newStyles={{ fontFamily: "RubikBubbles" }}
+      />
+      {content}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    marginTop: 30,
+    flex: 1,
   },
-  input:{
-    borderBottomWidth: 1,
-    width: 230,
-    marginRight: 15, 
-  },
-  inputContainer:{
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'center',
-    paddingBottom:120,
-  },
-  text:{
-    fontSize: 30,
-    color: 'purple',
-    borderWidth:1,
-    padding: 5,
-    marginVertical: 15,
-  }
 });
 
-
-
-{/*<View style={styles.inputContainer}>
-<TextInput style={styles.input} />
-<Button title='Agregar' />
-</View>
-<View>
-<Text style={styles.text}>Item #1</Text>
-<Text style={styles.text}>Item #2</Text>
-<Text style={styles.text}>Item #3</Text>
-</View>*/}
